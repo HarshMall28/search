@@ -19,31 +19,31 @@
 
 ## 🌐 Live Demo
 
-| | |
-|---|---|
-| **Frontend** | [🔗 View Live App](#) ← _Add your Vercel URL here_ |
-| **Backend** | [🔗 GraphQL Playground](#) ← _Add your Railway URL here_ |
+|              |                                                                |
+| ------------ | -------------------------------------------------------------- |
+| **Frontend** | [🔗 View Live App](#) ← https://search-green-three.vercel.app/ |
 
 > Replace the `#` links above with your deployed URLs after hosting.
 
 ![SenseiSearch Demo](./assets/demo.gif)
+
 > 📸 Add a screen recording GIF here showing the benchmark in action
 
 ---
 
 ## 🎯 What This Project Demonstrates
 
-| Concept | Implementation | Why It Matters |
-|---|---|---|
-| Search engine internals | MongoDB `$regex` vs Atlas Search Lucene index | Shows O(n) vs O(1) at scale |
-| GraphQL API design | Apollo Server v5, type definitions, resolvers | Industry standard API layer |
-| N+1 query problem | DataLoader batching with `$in` | Asked in every senior interview |
-| Query complexity scoring | `graphql-query-complexity` plugin | Protects API from abuse |
-| Fuzzy search | Atlas Search edit distance (`maxEdits: 2`) | Handles real user typos |
-| Parallel execution | `Promise.all()` for simultaneous engine queries | Non-blocking performance |
-| Inverted index | Atlas Search Lucene under the hood | Same tech as Elasticsearch |
-| React best practices | Custom hooks, component composition, <150 line files | Clean scalable frontend |
-| GSAP animations | Page transitions, stagger, ScrollTrigger | Premium 120Hz feel |
+| Concept                  | Implementation                                       | Why It Matters                  |
+| ------------------------ | ---------------------------------------------------- | ------------------------------- |
+| Search engine internals  | MongoDB `$regex` vs Atlas Search Lucene index        | Shows O(n) vs O(1) at scale     |
+| GraphQL API design       | Apollo Server v5, type definitions, resolvers        | Industry standard API layer     |
+| N+1 query problem        | DataLoader batching with `$in`                       | Asked in every senior interview |
+| Query complexity scoring | `graphql-query-complexity` plugin                    | Protects API from abuse         |
+| Fuzzy search             | Atlas Search edit distance (`maxEdits: 2`)           | Handles real user typos         |
+| Parallel execution       | `Promise.all()` for simultaneous engine queries      | Non-blocking performance        |
+| Inverted index           | Atlas Search Lucene under the hood                   | Same tech as Elasticsearch      |
+| React best practices     | Custom hooks, component composition, <150 line files | Clean scalable frontend         |
+| GSAP animations          | Page transitions, stagger, ScrollTrigger             | Premium 120Hz feel              |
 
 ---
 
@@ -51,14 +51,14 @@
 
 > Tested with 100,000 seeded product documents on MongoDB Atlas M0 free tier
 
-| Search Term | MongoDB `$regex` | Atlas Search | Speedup |
-|---|---|---|---|
-| `"iphone"` | ~420ms | ~18ms | ~23x faster |
-| `"macbook"` | ~380ms | ~12ms | ~31x faster |
-| `"sony"` | ~450ms | ~15ms | ~30x faster |
-| `"iphane"` (typo) | 0 results | ✅ finds iPhones | fuzzy match |
-| `"samsng"` (typo) | 0 results | ✅ finds Samsung | fuzzy match |
-| `"macbok"` (typo) | 0 results | ✅ finds MacBooks | fuzzy match |
+| Search Term       | MongoDB `$regex` | Atlas Search      | Speedup     |
+| ----------------- | ---------------- | ----------------- | ----------- |
+| `"iphone"`        | ~420ms           | ~18ms             | ~23x faster |
+| `"macbook"`       | ~380ms           | ~12ms             | ~31x faster |
+| `"sony"`          | ~450ms           | ~15ms             | ~30x faster |
+| `"iphane"` (typo) | 0 results        | ✅ finds iPhones  | fuzzy match |
+| `"samsng"` (typo) | 0 results        | ✅ finds Samsung  | fuzzy match |
+| `"macbok"` (typo) | 0 results        | ✅ finds MacBooks | fuzzy match |
 
 > **Note:** MongoDB times include a floor delay to simulate realistic production behavior. Atlas M0 free tier aggressively caches queries in memory, masking the true cost of an unindexed collection scan. In production MongoDB without caching, `$regex` on 100k unindexed documents genuinely takes 300–800ms.
 
@@ -67,28 +67,30 @@
 ## 🛠 Tech Stack
 
 ### Frontend
-| Technology | Version | Purpose |
-|---|---|---|
-| Next.js | 16.2.4 | App Router, SSR, routing |
-| React | 19.2.4 | UI component library |
-| Tailwind CSS | 4+ | Utility-first styling |
-| Apollo Client | 4.1.9 | GraphQL client + caching |
-| GSAP | 3.15.0 | Premium animations, page transitions |
-| Monaco Editor | 4.7.0 | In-browser code editor |
-| Prism React Renderer | 2.4.1 | Syntax highlighting |
+
+| Technology           | Version | Purpose                              |
+| -------------------- | ------- | ------------------------------------ |
+| Next.js              | 16.2.4  | App Router, SSR, routing             |
+| React                | 19.2.4  | UI component library                 |
+| Tailwind CSS         | 4+      | Utility-first styling                |
+| Apollo Client        | 4.1.9   | GraphQL client + caching             |
+| GSAP                 | 3.15.0  | Premium animations, page transitions |
+| Monaco Editor        | 4.7.0   | In-browser code editor               |
+| Prism React Renderer | 2.4.1   | Syntax highlighting                  |
 
 ### Backend
-| Technology | Version | Purpose |
-|---|---|---|
-| Node.js | 18+ | Runtime |
-| Express | 5.2.1 | HTTP server |
-| Apollo Server | 5.5.0 | GraphQL server |
-| GraphQL | 16.13.2 | Query language and schema |
-| Mongoose | 9.6.0 | MongoDB ODM |
-| DataLoader | 2.2.3 | N+1 query batching |
-| graphql-query-complexity | 1.1.0 | Query complexity guard |
-| MongoDB Atlas Search | — | Lucene inverted index search |
-| dotenv | 17.4.2 | Environment variable management |
+
+| Technology               | Version | Purpose                         |
+| ------------------------ | ------- | ------------------------------- |
+| Node.js                  | 18+     | Runtime                         |
+| Express                  | 5.2.1   | HTTP server                     |
+| Apollo Server            | 5.5.0   | GraphQL server                  |
+| GraphQL                  | 16.13.2 | Query language and schema       |
+| Mongoose                 | 9.6.0   | MongoDB ODM                     |
+| DataLoader               | 2.2.3   | N+1 query batching              |
+| graphql-query-complexity | 1.1.0   | Query complexity guard          |
+| MongoDB Atlas Search     | —       | Lucene inverted index search    |
+| dotenv                   | 17.4.2  | Environment variable management |
 
 ---
 
@@ -175,11 +177,13 @@ senseisearch/
 ## 🔗 GraphQL API
 
 ### Endpoint
+
 ```
 POST /graphql
 ```
 
 ### Main Query
+
 ```graphql
 query Search($term: String!, $limit: Int) {
   search(term: $term, limit: $limit) {
@@ -215,6 +219,7 @@ query Search($term: String!, $limit: Int) {
 ```
 
 ### Example Response
+
 ```json
 {
   "data": {
@@ -232,6 +237,7 @@ query Search($term: String!, $limit: Int) {
 ```
 
 ### Additional Queries
+
 ```graphql
 # Fetch a single product by ID (uses DataLoader batching)
 query GetProduct($id: ID!) {
@@ -260,55 +266,65 @@ query ListProducts($limit: Int) {
 ## 🚀 Running Locally
 
 ### Prerequisites
+
 - Node.js 18+
 - MongoDB Atlas account (free M0 tier)
 - Atlas Search index named `products_search` created on your cluster
 
 ### 1. Clone the repo
+
 ```bash
 git clone https://github.com/yourusername/senseisearch.git
 cd senseisearch
 ```
 
 ### 2. Setup backend
+
 ```bash
 cd server
 npm install
 ```
 
 Create `server/.env`:
+
 ```env
 MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/senseisearch
 PORT=4000
 ```
 
 Seed 100,000 products:
+
 ```bash
 node src/scripts/seedData.js
 ```
 
 Start backend:
+
 ```bash
 npm run dev
 ```
 
 ### 3. Setup frontend
+
 ```bash
 cd ../client
 npm install
 ```
 
 Create `client/.env.local`:
+
 ```env
 NEXT_PUBLIC_GRAPHQL_URL=http://localhost:4000/graphql
 ```
 
 Start frontend:
+
 ```bash
 npm run dev
 ```
 
 ### 4. Visit
+
 ```
 http://localhost:3000
 ```
@@ -349,11 +365,11 @@ The `product(id: ID!)` query uses DataLoader to batch multiple individual ID loo
 
 ## 🌍 Deployment (Free Tier)
 
-| Service | Platform | Cost |
-|---|---|---|
-| Frontend | Vercel | Free forever |
-| Backend | Railway | Free tier |
-| Database | MongoDB Atlas M0 | Free forever |
+| Service      | Platform             | Cost                   |
+| ------------ | -------------------- | ---------------------- |
+| Frontend     | Vercel               | Free forever           |
+| Backend      | Railway              | Free tier              |
+| Database     | MongoDB Atlas M0     | Free forever           |
 | Search Index | MongoDB Atlas Search | Free, built into Atlas |
 
 ---
