@@ -1,0 +1,1828 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SenseiSearch — Search, Decoded</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --bg:#0A0A0A;
+    --bg-2:#0D0D0D;
+    --card:#141414;
+    --card-2:#1A1A1A;
+    --line:#2A2A2A;
+    --line-2:#1f1f1f;
+    --ink:#EDEDED;
+    --ink-dim:#9A9A9A;
+    --ink-faint:#5e5e5e;
+    --blue:#378ADD;
+    --blue-2:#5BA8F5;
+    --teal:#1D9E75;
+    --teal-2:#26C893;
+    --amber:#EF9F27;
+    --amber-2:#F6B85A;
+    --coral:#D85A30;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body{min-height:100vh}
+  .mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+
+  /* ===== NAV ===== */
+  .nav{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 36px;
+    background:linear-gradient(180deg, rgba(10,10,10,.85), rgba(10,10,10,.55));
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line-2);
+    transform:translateY(-100%);
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:-.01em}
+  .logo-mark{
+    width:28px;height:28px;border-radius:8px;
+    background:linear-gradient(135deg,#1a3656,#0e1c2c);
+    border:1px solid #2a4a72;
+    display:grid;place-items:center;
+    box-shadow:0 0 14px rgba(55,138,221,.35), inset 0 0 10px rgba(55,138,221,.2);
+  }
+  .logo-mark svg{width:14px;height:14px;fill:#7ec0ff;filter:drop-shadow(0 0 6px #378ADD)}
+  .logo span.s2{color:#9bbef0}
+  .nav-links{display:flex;gap:28px;font-size:14px}
+  .nav-links a{color:var(--ink-dim);text-decoration:none;position:relative;padding:6px 2px;transition:color .2s}
+  .nav-links a:hover{color:var(--ink)}
+  .nav-links a.active{color:var(--ink)}
+  .nav-links a.active::after{
+    content:"";position:absolute;left:0;right:0;bottom:-4px;height:2px;border-radius:2px;
+    background:var(--blue);box-shadow:0 0 10px var(--blue);
+  }
+  .cta-try{
+    padding:9px 18px;border-radius:999px;
+    background:rgba(55,138,221,.08);
+    border:1px solid rgba(55,138,221,.55);
+    color:#cfe5ff;font-weight:600;font-size:13.5px;letter-spacing:.01em;
+    cursor:pointer;
+    box-shadow:0 0 18px rgba(55,138,221,.25), inset 0 0 12px rgba(55,138,221,.15);
+    transition:all .2s;
+    font-family:inherit;
+  }
+  .cta-try:hover{background:rgba(55,138,221,.18);box-shadow:0 0 28px rgba(55,138,221,.5), inset 0 0 14px rgba(55,138,221,.25)}
+
+  /* ===== SCREENS ===== */
+  .screen{position:absolute;inset:0;width:100%;min-height:100vh;will-change:transform,opacity}
+  .screen.s1{padding-top:0}
+  .screen.s2{padding-top:90px;display:none}
+
+  /* ===== HERO BG ===== */
+  .hero-bg{
+    position:absolute;inset:0;overflow:hidden;pointer-events:none;
+    background:
+      radial-gradient(900px 600px at 20% 30%, rgba(55,138,221,.08), transparent 60%),
+      radial-gradient(800px 700px at 85% 70%, rgba(29,158,117,.05), transparent 55%),
+      var(--bg);
+  }
+  .grid-pattern{
+    position:absolute;inset:-2px;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,.04) 1px, transparent 1px);
+    background-size:54px 54px;
+    mask-image:radial-gradient(ellipse at center, black 30%, transparent 75%);
+    -webkit-mask-image:radial-gradient(ellipse at center, black 30%, transparent 75%);
+  }
+  #particles{position:absolute;inset:0;width:100%;height:100%}
+  .glow-orb{
+    position:absolute;border-radius:50%;filter:blur(80px);opacity:.5;pointer-events:none;
+  }
+  .orb-1{width:420px;height:420px;background:#1a4d8a;top:-100px;left:-80px;animation:drift 18s ease-in-out infinite}
+  .orb-2{width:380px;height:380px;background:#0e5e47;bottom:-120px;right:-60px;animation:drift 22s ease-in-out infinite reverse}
+  @keyframes drift{
+    0%,100%{transform:translate(0,0)}
+    50%{transform:translate(40px,-30px)}
+  }
+
+  /* ===== HERO ===== */
+  .hero{
+    position:relative;z-index:2;
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:120px 24px 60px;text-align:center;
+  }
+  .pill-eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 14px;border-radius:999px;
+    background:rgba(55,138,221,.06);border:1px solid rgba(55,138,221,.25);
+    font-size:12px;color:#a5c6ec;letter-spacing:.08em;text-transform:uppercase;
+    margin-bottom:32px;
+    font-family:'JetBrains Mono',monospace;font-weight:500;
+  }
+  .pill-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue);animation:dotpulse 1.6s ease-in-out infinite}
+  @keyframes dotpulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+  .headline{
+    font-size:clamp(34px,5.4vw,72px);
+    font-weight:700;line-height:1.05;letter-spacing:-.025em;
+    max-width:1100px;margin:0 0 28px;
+    min-height:2.2em;
+    text-wrap:balance;
+  }
+  .typed{color:var(--ink)}
+  .cursor{
+    display:inline-block;width:.55ch;height:.95em;background:var(--blue);
+    margin-left:6px;vertical-align:-0.12em;border-radius:1px;
+    box-shadow:0 0 14px var(--blue);
+    animation:blink 1s steps(1) infinite;
+  }
+  @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+  .subhead{
+    font-size:clamp(15px,1.4vw,19px);color:var(--ink-dim);
+    max-width:680px;margin:0 0 44px;line-height:1.55;
+  }
+  .subhead b{color:#cfe5ff;font-weight:500}
+
+  .ctas{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+  .btn{
+    font-family:inherit;font-weight:600;font-size:15px;letter-spacing:-.005em;
+    padding:14px 26px;border-radius:999px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:10px;transition:all .25s;
+    border:1px solid transparent;
+  }
+  .btn-primary{
+    background:var(--blue);color:#fff;
+    box-shadow:0 0 0 1px rgba(255,255,255,.06) inset, 0 0 32px rgba(55,138,221,.55), 0 6px 24px rgba(55,138,221,.35);
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 0 0 1px rgba(255,255,255,.1) inset, 0 0 44px rgba(55,138,221,.75), 0 8px 28px rgba(55,138,221,.5)}
+  .btn-ghost{
+    background:transparent;color:#cfe5ff;border:1px solid rgba(255,255,255,.18);
+  }
+  .btn-ghost:hover{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.03)}
+  .btn svg{width:16px;height:16px}
+
+  /* tiny stats strip */
+  .stats{
+    display:flex;gap:48px;margin-top:90px;flex-wrap:wrap;justify-content:center;
+  }
+  .stat{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .stat-num{font-size:24px;font-weight:700;letter-spacing:-.02em}
+  .stat-num.blue{color:var(--blue-2)}
+  .stat-num.teal{color:var(--teal-2)}
+  .stat-num.amber{color:var(--amber-2)}
+  .stat-label{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.12em;font-family:'JetBrains Mono',monospace}
+
+  /* ===== SCREEN 2 ===== */
+  .bench-wrap{max-width:1320px;margin:0 auto;padding:24px 36px 80px;position:relative}
+  .bench-bg{
+    position:absolute;inset:0;pointer-events:none;
+    background:
+      radial-gradient(700px 400px at 15% 0%, rgba(239,159,39,.04), transparent 60%),
+      radial-gradient(700px 400px at 85% 0%, rgba(55,138,221,.06), transparent 60%);
+  }
+  .bench-head{display:flex;align-items:flex-end;justify-content:space-between;margin:14px 0 22px;gap:24px;flex-wrap:wrap}
+  .bench-title h1{font-size:30px;margin:0 0 6px;letter-spacing:-.02em;font-weight:700}
+  .bench-title p{margin:0;color:var(--ink-dim);font-size:14px}
+  .bench-title .accent{color:var(--blue-2)}
+  .bench-meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);display:flex;gap:18px;align-items:center}
+  .bench-meta .live-dot{width:7px;height:7px;border-radius:50%;background:var(--teal-2);box-shadow:0 0 8px var(--teal-2);animation:dotpulse 1.4s infinite}
+
+  .search-card{
+    background:linear-gradient(180deg, #121212, #0e0e0e);
+    border:1px solid var(--line);border-radius:18px;padding:22px;
+    position:relative;
+  }
+  .search-input-wrap{
+    position:relative;display:flex;align-items:center;gap:12px;
+    background:#0a0a0a;border:1px solid var(--line);border-radius:14px;
+    padding:14px 18px;transition:all .2s;
+  }
+  .search-input-wrap.focus{
+    border-color:rgba(55,138,221,.6);
+    box-shadow:0 0 0 4px rgba(55,138,221,.12), 0 0 24px rgba(55,138,221,.25);
+  }
+  .search-icon{width:18px;height:18px;color:var(--ink-faint);flex-shrink:0}
+  .search-input{
+    flex:1;background:none;border:none;outline:none;color:var(--ink);
+    font-family:inherit;font-size:16px;letter-spacing:-.005em;
+  }
+  .search-input::placeholder{color:#555}
+  .kbd{
+    display:inline-flex;gap:4px;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;font-size:11px;
+  }
+  .kbd kbd{
+    background:#1c1c1c;border:1px solid var(--line);border-radius:6px;padding:3px 7px;
+    box-shadow:inset 0 -1px 0 #000;
+  }
+
+  .engine-row{display:flex;gap:12px;margin-top:14px;position:relative}
+
+  /* ===== TYPO HINT ROW ===== */
+  .typo-hint{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    margin-top:10px;padding:0 4px;flex-wrap:wrap;
+  }
+  .typo-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .typo-label{
+    font-size:12px;color:#888;font-style:italic;letter-spacing:.01em;
+  }
+  .typo-chip{
+    font-family:'JetBrains Mono',monospace;font-size:12px;
+    padding:5px 11px;border-radius:999px;
+    background:#1A1A1A;border:1px solid #2A2A2A;color:#888;
+    cursor:pointer;transition:all .2s;
+    font-weight:500;
+  }
+  .typo-chip:hover{
+    color:#bfdcff;border-color:rgba(55,138,221,.55);
+    box-shadow:0 0 12px rgba(55,138,221,.25), inset 0 0 8px rgba(55,138,221,.06);
+  }
+  .typo-fuzzy{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:11px;color:#1D9E75;font-family:'JetBrains Mono',monospace;
+    letter-spacing:.04em;font-weight:600;
+  }
+  .typo-fuzzy .heart{
+    width:7px;height:7px;border-radius:50%;background:#1D9E75;
+    box-shadow:0 0 8px #1D9E75;
+    animation:heartbeat 1.6s ease-in-out infinite;
+  }
+  @keyframes heartbeat{
+    0%,40%,100%{transform:scale(1);opacity:.85}
+    15%{transform:scale(1.5);opacity:1}
+    30%{transform:scale(1.2);opacity:1}
+  }
+  .engine-btn{
+    flex:1;font-family:inherit;cursor:pointer;
+    padding:14px 18px;border-radius:12px;
+    display:flex;align-items:center;gap:12px;
+    font-size:14.5px;font-weight:600;letter-spacing:-.005em;
+    transition:all .2s;
+    text-align:left;
+  }
+  .engine-btn .icon{
+    width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;
+  }
+  .engine-btn .label{display:flex;flex-direction:column;gap:2px}
+  .engine-btn .label small{font-weight:500;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;opacity:.7}
+
+  .engine-slow{
+    background:rgba(239,159,39,.06);border:1px solid rgba(239,159,39,.35);color:#f7c87a;
+  }
+  .engine-slow .icon{background:rgba(239,159,39,.15);color:var(--amber-2)}
+  .engine-slow:hover{background:rgba(239,159,39,.1);border-color:rgba(239,159,39,.55)}
+
+  .engine-fast{
+    background:rgba(55,138,221,.08);border:1px solid rgba(55,138,221,.5);color:#bfdcff;
+    box-shadow:0 0 24px rgba(55,138,221,.2);
+    position:relative;
+  }
+  .engine-fast .icon{background:rgba(55,138,221,.2);color:#7ec0ff}
+  .engine-fast:hover{background:rgba(55,138,221,.14);box-shadow:0 0 32px rgba(55,138,221,.35)}
+  .engine-btn.active{outline:2px solid currentColor;outline-offset:2px}
+
+  /* loading bar (slow) */
+  .loadbar{
+    position:absolute;left:0;right:0;top:-1px;height:2px;
+    background:linear-gradient(90deg,transparent,var(--amber),transparent);
+    transform:scaleX(0);transform-origin:left;
+    border-radius:2px;
+    box-shadow:0 0 14px var(--amber);
+    opacity:0;
+  }
+
+  /* ===== RESULT GRID ===== */
+  .results-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px;
+  }
+  .panel{
+    background:linear-gradient(180deg,#101010,#0c0c0c);
+    border:1px solid var(--line);border-radius:16px;
+    padding:18px;display:flex;flex-direction:column;min-height:480px;
+    position:relative;overflow:hidden;
+  }
+  .panel.fast::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:2px;
+    background:linear-gradient(180deg, transparent, var(--blue), transparent);
+    box-shadow:0 0 14px var(--blue);
+  }
+  .panel-head{
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;
+    padding-bottom:14px;border-bottom:1px solid var(--line-2);
+  }
+  .panel-title{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600}
+  .panel-title .dot{width:8px;height:8px;border-radius:50%}
+  .panel-title.slow .dot{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+  .panel-title.fast .dot{background:var(--teal-2);box-shadow:0 0 8px var(--teal-2)}
+  .panel-title small{color:var(--ink-faint);font-weight:500;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+
+  .latency-badge{
+    font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+    padding:5px 10px;border-radius:6px;letter-spacing:.02em;
+    display:inline-flex;align-items:center;gap:6px;
+    opacity:0;
+  }
+  .latency-badge.slow{background:rgba(216,90,48,.12);color:#ff8a5c;border:1px solid rgba(216,90,48,.4)}
+  .latency-badge.fast{background:rgba(29,158,117,.12);color:var(--teal-2);border:1px solid rgba(29,158,117,.4)}
+  .latency-badge.slow .pip{width:6px;height:6px;border-radius:50%;background:#ff8a5c;animation:slowpulse 1.6s ease-in-out infinite}
+  .latency-badge.fast .pip{width:6px;height:6px;border-radius:50%;background:var(--teal-2)}
+  .fuzzy-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;background:rgba(38,200,147,.1);color:var(--teal-2);border:1px solid rgba(38,200,147,.35);font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.02em}
+  @keyframes slowpulse{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1.2)}}
+
+  .results-list{display:flex;flex-direction:column;gap:10px;flex:1}
+
+  .result-card{
+    display:flex;gap:14px;padding:12px;border-radius:12px;
+    background:#141414;border:1px solid var(--line-2);
+    opacity:0;
+  }
+  .panel.fast .result-card{
+    background:linear-gradient(180deg, #131820, #101317);
+    border-color:rgba(55,138,221,.18);
+  }
+  .result-thumb{
+    width:64px;height:64px;border-radius:10px;flex-shrink:0;position:relative;overflow:hidden;
+    background:#1a1a1a;
+  }
+  .result-thumb .ph{
+    position:absolute;inset:0;
+    background-image:repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 6px, transparent 6px 12px);
+  }
+  .result-thumb .label{
+    position:absolute;left:6px;bottom:5px;font-size:9px;font-family:'JetBrains Mono',monospace;color:#888;letter-spacing:.05em;text-transform:uppercase;
+  }
+  .result-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+  .result-name{font-size:14px;font-weight:600;letter-spacing:-.005em;color:var(--ink)}
+  .result-name mark{background:rgba(55,138,221,.22);color:#bfdcff;padding:1px 3px;border-radius:3px;font-weight:700}
+  .result-desc{font-size:12.5px;color:var(--ink-dim);line-height:1.4;
+    overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;
+  }
+  .result-meta{display:flex;align-items:center;gap:8px;margin-top:4px}
+  .tag{
+    font-size:10.5px;padding:3px 8px;border-radius:999px;font-weight:600;letter-spacing:.04em;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .tag-phones{background:rgba(55,138,221,.12);color:#7ec0ff;border:1px solid rgba(55,138,221,.25)}
+  .tag-laptops{background:rgba(180,90,220,.12);color:#d49bff;border:1px solid rgba(180,90,220,.25)}
+  .tag-audio{background:rgba(29,158,117,.12);color:var(--teal-2);border:1px solid rgba(29,158,117,.3)}
+  .tag-tablets{background:rgba(239,159,39,.12);color:var(--amber-2);border:1px solid rgba(239,159,39,.25)}
+  .tag-watches{background:rgba(216,90,48,.12);color:#ff8a5c;border:1px solid rgba(216,90,48,.3)}
+  .price{font-size:12.5px;font-weight:700;color:#cfe5ff;font-family:'JetBrains Mono',monospace;margin-left:auto}
+
+  /* ===== SPEED COMPARE BAR ===== */
+
+  /* ===== ADVANTAGES STRIP ===== */
+  .adv-section{margin-top:24px}
+  .adv-heading{
+    font-size:13px;font-weight:500;color:#888;
+    margin:0 0 12px;letter-spacing:.02em;
+  }
+  .adv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .adv-card{
+    background:#141414;border:1px solid #2A2A2A;border-radius:10px;
+    padding:16px;display:flex;flex-direction:column;gap:8px;
+    transition:all .25s;
+    --accent:#7ec0ff;
+    --accent-rgb:126,192,255;
+  }
+  .adv-card.teal{--accent:var(--teal-2);--accent-rgb:38,200,147}
+  .adv-card.blue{--accent:#7ec0ff;--accent-rgb:126,192,255}
+  .adv-card.amber{--accent:var(--amber-2);--accent-rgb:246,184,90}
+  .adv-card:hover{
+    border-color:var(--accent);
+    box-shadow:0 0 24px rgba(var(--accent-rgb),.18), inset 0 0 0 1px rgba(var(--accent-rgb),.15);
+    transform:translateY(-1px);
+  }
+  .adv-icon{
+    width:18px;height:18px;color:var(--accent);
+    display:inline-block;
+  }
+  .adv-icon svg{width:18px;height:18px;stroke-width:2}
+  .adv-title{
+    font-size:13px;font-weight:500;color:#fff;letter-spacing:-.005em;
+  }
+  .adv-body{
+    font-size:12px;color:#888;line-height:1.6;margin:0;
+  }
+  .adv-body em{
+    color:var(--accent);font-style:normal;font-family:'JetBrains Mono',monospace;
+    font-size:11px;padding:1px 5px;border-radius:4px;
+    background:rgba(var(--accent-rgb),.08);
+    border:1px solid rgba(var(--accent-rgb),.2);
+  }
+
+  /* ===== SPEED COMPARE BAR ===== */
+  .compare-card{
+    margin-top:24px;
+    background:linear-gradient(180deg,#0f1318,#0a0d10);
+    border:1px solid var(--line);border-radius:16px;
+    padding:22px;display:flex;flex-direction:column;gap:14px;
+  }
+  .compare-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+  .compare-title{display:flex;align-items:center;gap:12px;font-size:18px;font-weight:600;letter-spacing:-.01em}
+  .multiplier{
+    font-family:'JetBrains Mono',monospace;font-weight:700;
+    color:var(--teal-2);font-size:22px;letter-spacing:-.02em;
+    text-shadow:0 0 14px rgba(38,200,147,.4);
+  }
+  .compare-bars{display:flex;flex-direction:column;gap:10px}
+  .compare-row{display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:12px}
+  .compare-row .name{width:140px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+  .compare-row .track{flex:1;height:10px;border-radius:5px;background:#0a0a0a;border:1px solid var(--line-2);overflow:hidden;position:relative}
+  .compare-row .fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;width:0}
+  .fill-slow{background:linear-gradient(90deg, var(--amber), var(--coral));box-shadow:0 0 12px rgba(239,159,39,.4)}
+  .fill-fast{background:linear-gradient(90deg, var(--blue), var(--teal-2));box-shadow:0 0 12px rgba(55,138,221,.4)}
+  .compare-row .ms{width:80px;text-align:right;color:var(--ink);font-weight:700}
+  .compare-row .ms.warn{color:#ff8a5c}
+  .compare-row .ms.ok{color:var(--teal-2)}
+
+  /* ===== CONSOLE BUBBLE ===== */
+  .console-bubble{
+    position:absolute;
+    width:340px;
+    background:#08090b;
+    border:1px solid rgba(55,138,221,.5);
+    border-radius:12px;
+    padding:14px 16px 14px;
+    font-family:'JetBrains Mono',monospace;font-size:12px;
+    color:#cfe5ff;
+    z-index:30;
+    box-shadow:0 20px 50px rgba(0,0,0,.6), 0 0 30px rgba(55,138,221,.4);
+    transform:scale(0);transform-origin:top left;
+    pointer-events:none;
+  }
+  .console-bubble::before{
+    content:"";position:absolute;left:36px;top:-7px;width:12px;height:12px;
+    background:#08090b;border-left:1px solid rgba(55,138,221,.5);border-top:1px solid rgba(55,138,221,.5);
+    transform:rotate(45deg);
+  }
+  .console-head{
+    display:flex;align-items:center;gap:6px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #1a1f28;
+    font-size:11px;color:var(--ink-faint);letter-spacing:.08em;text-transform:uppercase;
+  }
+  .dots{display:flex;gap:4px}
+  .dots i{width:8px;height:8px;border-radius:50%;display:block}
+  .dots i:nth-child(1){background:#ff5f56}
+  .dots i:nth-child(2){background:#ffbd2e}
+  .dots i:nth-child(3){background:#27c93f}
+  .console-title{margin-left:8px}
+  .console-line{display:flex;gap:8px;line-height:1.7;opacity:0}
+  .console-line .check{color:var(--teal-2)}
+  .console-line .key{color:#7ec0ff}
+  .console-line .val{color:#fff}
+  .console-line .num{color:var(--amber-2)}
+
+  /* ===== FOOTER ===== */
+  .foot{
+    text-align:center;padding:20px 0 0;color:var(--ink-faint);font-size:12px;
+    font-family:'JetBrains Mono',monospace;letter-spacing:.05em;
+  }
+  .foot kbd{background:#1c1c1c;border:1px solid var(--line);border-radius:5px;padding:2px 6px;color:var(--ink-dim);margin:0 2px}
+
+  /* tweaks panel */
+  .tweaks{
+    position:fixed;bottom:24px;right:24px;z-index:100;
+    background:#101010;border:1px solid var(--line);border-radius:14px;
+    padding:14px 16px;width:240px;
+    font-family:'JetBrains Mono',monospace;font-size:12px;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+    display:none;
+  }
+  .tweaks.open{display:block}
+  .tweaks h4{margin:0 0 10px;color:var(--ink-dim);font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+  .tweaks button{
+    width:100%;padding:8px 10px;background:#1a1a1a;border:1px solid var(--line);color:var(--ink);
+    font-family:inherit;font-size:11.5px;border-radius:8px;cursor:pointer;text-align:left;margin-bottom:6px;
+  }
+  .tweaks button:hover{background:#222}
+  .tweaks .tweaks-toggle{
+    position:fixed;bottom:24px;right:24px;
+    background:rgba(55,138,221,.12);border:1px solid rgba(55,138,221,.4);
+    color:#bfdcff;border-radius:50%;width:42px;height:42px;
+    display:grid;place-items:center;cursor:pointer;
+  }
+
+  /* ===== SCREEN 3: ARCHITECTURE ===== */
+  .arch-wrap{max-width:1320px;margin:0 auto;padding:24px 36px 80px;position:relative}
+  .arch-head{margin:14px 0 38px;text-align:center}
+  .arch-head h1{font-size:42px;margin:0 0 10px;font-weight:700;letter-spacing:-.025em}
+  .arch-head h1 .acc{color:var(--blue-2)}
+  .arch-head p{margin:0;color:var(--ink-dim);font-size:16px}
+
+  .flow-rail{
+    position:relative;
+    background:linear-gradient(180deg,#0f0f10,#0b0b0c);
+    border:1px solid var(--line);border-radius:20px;
+    padding:48px 28px 36px;
+    margin-bottom:24px;
+  }
+  .flow-nodes{
+    display:grid;grid-template-columns:repeat(6,1fr);gap:14px;
+    position:relative;
+  }
+  .flow-line{
+    position:absolute;left:6%;right:6%;top:48px;height:2px;
+    background:linear-gradient(90deg, #1f1f1f 0%, #1f1f1f 100%);
+    border-radius:2px;overflow:hidden;
+  }
+  .flow-line svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .flow-line .seg{stroke:#1f1f1f;stroke-width:2;fill:none}
+  .flow-line .seg.done{stroke:var(--teal);filter:drop-shadow(0 0 4px rgba(38,200,147,.5))}
+  .flow-line .seg.active{stroke:var(--blue);stroke-dasharray:6 8;filter:drop-shadow(0 0 6px rgba(55,138,221,.7))}
+  @keyframes dashflow{to{stroke-dashoffset:-28}}
+  .flow-line .seg.active{animation:dashflow .9s linear infinite}
+
+  .flow-node{
+    position:relative;z-index:2;
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    cursor:pointer;
+  }
+  .flow-node .bubble{
+    width:96px;height:96px;border-radius:50%;
+    background:#0c0c0d;border:1px solid var(--line);
+    display:grid;place-items:center;
+    color:var(--ink-faint);
+    transition:all .35s cubic-bezier(.34,1.56,.64,1);
+    position:relative;
+  }
+  .flow-node .bubble svg{width:36px;height:36px;stroke-width:1.6}
+  .flow-node .num{
+    position:absolute;top:-6px;right:-6px;
+    width:22px;height:22px;border-radius:50%;
+    background:#1a1a1a;border:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--ink-dim);
+    display:grid;place-items:center;
+  }
+  .flow-node .lbl{
+    font-size:12.5px;color:var(--ink-dim);font-weight:600;text-align:center;
+    max-width:160px;line-height:1.35;letter-spacing:-.005em;
+  }
+  .flow-node.done .bubble{border-color:rgba(29,158,117,.45);color:var(--teal-2);background:rgba(29,158,117,.06);box-shadow:0 0 18px rgba(29,158,117,.18)}
+  .flow-node.done .num{background:rgba(29,158,117,.15);border-color:rgba(29,158,117,.4);color:var(--teal-2)}
+  .flow-node.done .lbl{color:#bfd8ce}
+  .flow-node.active .bubble{
+    border-color:rgba(55,138,221,.6);color:#bfdcff;background:rgba(55,138,221,.1);
+    box-shadow:0 0 0 4px rgba(55,138,221,.1), 0 0 32px rgba(55,138,221,.45);
+    transform:scale(1.08);
+  }
+  .flow-node.active .num{background:var(--blue);border-color:var(--blue);color:#fff}
+  .flow-node.active .lbl{color:var(--ink)}
+  .flow-node.amber.active .bubble{border-color:rgba(239,159,39,.55);color:var(--amber-2);background:rgba(239,159,39,.08);box-shadow:0 0 0 4px rgba(239,159,39,.1), 0 0 32px rgba(239,159,39,.4)}
+  .flow-node.amber.active .num{background:var(--amber);border-color:var(--amber);color:#1a1100}
+  .flow-node.teal.active .bubble{border-color:rgba(38,200,147,.55);color:var(--teal-2);background:rgba(38,200,147,.08);box-shadow:0 0 0 4px rgba(38,200,147,.1), 0 0 32px rgba(38,200,147,.4)}
+  .flow-node.teal.active .num{background:var(--teal-2);border-color:var(--teal-2);color:#001f14}
+
+  .flow-controls{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    margin-top:36px;padding-top:24px;border-top:1px solid var(--line-2);
+  }
+  .ctrl-btn{
+    font-family:inherit;cursor:pointer;
+    padding:10px 18px;border-radius:10px;
+    background:#1a1a1a;border:1px solid var(--line);color:var(--ink);
+    font-size:13.5px;font-weight:600;letter-spacing:-.005em;
+    display:inline-flex;align-items:center;gap:8px;
+    transition:all .2s;
+  }
+  .ctrl-btn:hover{background:#222;border-color:#3a3a3a}
+  .ctrl-btn:disabled{opacity:.4;cursor:not-allowed}
+  .ctrl-btn.primary{
+    background:var(--blue);color:#fff;border-color:transparent;
+    box-shadow:0 0 24px rgba(55,138,221,.4);
+  }
+  .ctrl-btn.primary:hover{box-shadow:0 0 32px rgba(55,138,221,.6)}
+  .step-counter{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink-dim);letter-spacing:.04em}
+  .step-counter b{color:var(--ink)}
+
+  /* detail panel */
+  .detail-panel{
+    background:linear-gradient(180deg, #101012, #0c0c0d);
+    border:1px solid var(--line);border-radius:18px;
+    padding:30px 32px;
+    display:grid;grid-template-columns:1.1fr .9fr;gap:32px;
+    min-height:280px;
+    position:relative;
+  }
+  .detail-panel .left h3{
+    font-size:24px;margin:0 0 6px;font-weight:700;letter-spacing:-.02em;
+    display:flex;align-items:center;gap:14px;
+  }
+  .detail-panel .left h3 .step-tag{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    padding:4px 10px;border-radius:6px;letter-spacing:.08em;
+    background:rgba(55,138,221,.12);color:#7ec0ff;border:1px solid rgba(55,138,221,.3);
+  }
+  .detail-panel .sub{color:var(--ink-dim);font-size:14px;margin:0 0 20px;line-height:1.5}
+  .detail-panel .body-text{color:#cfcfcf;font-size:15px;line-height:1.65;margin:0;text-wrap:pretty}
+  .detail-panel .right{display:flex;flex-direction:column;gap:14px}
+
+  .detail-card{
+    background:#0a0a0b;border:1px solid var(--line-2);border-radius:12px;
+    padding:14px 16px;
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;
+    color:#cfe5ff;line-height:1.55;
+  }
+  .detail-card .ck{color:var(--teal-2)}
+  .detail-card .kw{color:#c792ea}
+  .detail-card .str{color:#a5e3a0}
+  .detail-card .fn{color:#7ec0ff}
+  .detail-card .num{color:var(--amber-2)}
+  .detail-card .cm{color:#5e5e5e}
+
+  .complexity-strip{display:flex;gap:6px;align-items:center;font-family:'JetBrains Mono',monospace;font-size:11px}
+  .complexity-strip .seg{padding:5px 10px;border-radius:6px;font-weight:700;letter-spacing:.04em}
+  .complexity-strip .seg.green{background:rgba(38,200,147,.14);color:var(--teal-2);border:1px solid rgba(38,200,147,.3)}
+  .complexity-strip .seg.amber{background:rgba(239,159,39,.12);color:var(--amber-2);border:1px solid rgba(239,159,39,.3)}
+  .complexity-strip .seg.red{background:rgba(216,90,48,.12);color:#ff8a5c;border:1px solid rgba(216,90,48,.3)}
+  .score-pill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 12px;border-radius:8px;
+    background:rgba(38,200,147,.1);border:1px solid rgba(38,200,147,.35);
+    color:var(--teal-2);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+  }
+  .score-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--teal-2);box-shadow:0 0 8px var(--teal-2)}
+
+  .mini-bars{display:flex;flex-direction:column;gap:10px;font-family:'JetBrains Mono',monospace;font-size:11px}
+  .mini-bar{display:flex;align-items:center;gap:10px}
+  .mini-bar .lab{width:90px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.06em}
+  .mini-bar .track{flex:1;height:8px;background:#0a0a0a;border:1px solid var(--line-2);border-radius:4px;overflow:hidden;position:relative}
+  .mini-bar .fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:4px}
+  .mini-bar .ms{width:60px;text-align:right;font-weight:700}
+
+  .index-vis{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    font-family:'JetBrains Mono',monospace;font-size:12px;
+  }
+  .index-vis .word{padding:5px 10px;background:rgba(55,138,221,.15);color:#bfdcff;border:1px solid rgba(55,138,221,.4);border-radius:6px;font-weight:700}
+  .index-vis .arrow{color:var(--ink-faint)}
+  .index-vis .docs{display:flex;gap:6px;flex-wrap:wrap}
+  .index-vis .doc{padding:4px 8px;background:rgba(38,200,147,.1);color:var(--teal-2);border:1px solid rgba(38,200,147,.3);border-radius:5px;font-size:11px}
+
+  .stat-row{
+    display:flex;align-items:center;gap:14px;
+    padding:12px 14px;border-radius:10px;
+    background:#0a0a0b;border:1px solid var(--line-2);
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;
+  }
+  .stat-row .arrow-big{color:var(--ink-faint)}
+  .stat-row.warn .num{color:#ff8a5c;font-weight:700}
+  .stat-row.ok .num{color:var(--teal-2);font-weight:700}
+
+  /* ===== SCREEN 4: ABOUT ===== */
+  .about-wrap{max-width:1280px;margin:0 auto;padding:32px 36px 60px}
+  .about-section{margin-bottom:80px}
+  .about-section h2{
+    font-size:38px;margin:0 0 8px;font-weight:700;letter-spacing:-.025em;
+  }
+  .about-section .sub{color:var(--ink-dim);font-size:16px;margin:0 0 32px}
+  .section-eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    color:var(--blue-2);letter-spacing:.16em;text-transform:uppercase;
+    margin-bottom:14px;font-weight:600;
+  }
+  .stack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .stack-card{
+    background:linear-gradient(180deg,#111112,#0b0b0c);
+    border:1px solid var(--line);border-radius:14px;
+    padding:18px;display:flex;flex-direction:column;gap:10px;
+    transition:all .3s;
+  }
+  .stack-card:hover{border-color:rgba(55,138,221,.4);transform:translateY(-2px);box-shadow:0 12px 40px rgba(55,138,221,.1)}
+  .stack-icon{
+    width:44px;height:44px;border-radius:11px;
+    background:rgba(55,138,221,.1);border:1px solid rgba(55,138,221,.3);
+    display:grid;place-items:center;color:#7ec0ff;
+  }
+  .stack-icon svg{width:22px;height:22px;stroke-width:1.7}
+  .stack-name{font-size:15px;font-weight:700;letter-spacing:-.01em}
+  .stack-why{font-size:13px;color:var(--ink-dim);line-height:1.5}
+
+  .timeline{
+    margin-top:36px;background:#0c0c0d;border:1px solid var(--line);border-radius:14px;
+    padding:24px 22px;
+  }
+  .timeline-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px}
+  .timeline-rail{display:flex;align-items:center;gap:0;flex-wrap:wrap;row-gap:14px}
+  .tpill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:8px 14px;border-radius:999px;
+    background:#141415;border:1px solid var(--line);
+    font-size:13px;font-weight:600;color:var(--ink);
+    opacity:0;
+  }
+  .tpill .check{
+    width:16px;height:16px;border-radius:50%;
+    background:rgba(38,200,147,.15);color:var(--teal-2);
+    display:grid;place-items:center;
+  }
+  .tpill .check svg{width:10px;height:10px;stroke-width:3.5}
+  .tline{flex:1;height:1px;background:linear-gradient(90deg,var(--line),var(--line-2));min-width:14px;margin:0 6px;opacity:0}
+
+  /* scale cards */
+  .scale-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .scale-card{
+    background:linear-gradient(180deg,#101011,#0a0a0b);
+    border:1px solid var(--line);border-radius:18px;
+    padding:28px;display:flex;flex-direction:column;gap:14px;
+    position:relative;overflow:hidden;
+  }
+  .scale-card::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(55,138,221,.6),transparent);
+  }
+  .scale-icon{
+    width:48px;height:48px;border-radius:12px;
+    background:rgba(55,138,221,.1);border:1px solid rgba(55,138,221,.3);
+    display:grid;place-items:center;color:#7ec0ff;
+  }
+  .scale-icon svg{width:24px;height:24px;stroke-width:1.7}
+  .scale-num{
+    font-size:48px;font-weight:700;letter-spacing:-.03em;line-height:1;
+    color:var(--blue-2);
+    text-shadow:0 0 30px rgba(55,138,221,.35);
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .scale-label{font-size:13px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;letter-spacing:.04em;text-transform:uppercase}
+  .scale-body{font-size:14.5px;color:#bdbdbd;line-height:1.6;margin:0;text-wrap:pretty}
+
+  .closing{
+    text-align:center;margin:80px auto 24px;max-width:880px;
+    font-size:22px;line-height:1.5;color:#dcdcdc;font-weight:500;letter-spacing:-.01em;
+    text-wrap:balance;
+  }
+  .closing b{
+    background:linear-gradient(90deg, #7ec0ff, var(--teal-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700;
+  }
+  .about-foot{
+    border-top:1px solid var(--line-2);padding:24px 0 8px;margin-top:36px;
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
+    font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-faint);
+  }
+  .about-foot .links a{color:var(--ink-dim);text-decoration:none;margin-right:18px}
+  .about-foot .links a:hover{color:#7ec0ff}
+
+  .screen.s3,.screen.s4{display:none;padding-top:90px}
+
+  @media (max-width:880px){
+    .nav-links{display:none}
+    .results-grid{grid-template-columns:1fr}
+    .bench-wrap,.arch-wrap,.about-wrap{padding:24px 18px 80px}
+    .nav{padding:14px 18px}
+    .flow-nodes{grid-template-columns:repeat(3,1fr);row-gap:30px}
+    .detail-panel{grid-template-columns:1fr}
+    .stack-grid{grid-template-columns:repeat(2,1fr)}
+    .scale-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============== NAVBAR ============== -->
+<nav class="nav" id="nav">
+  <div class="logo">
+    <span class="logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-2 8 11-13h-6l2-7z"/></svg>
+    </span>
+    Sensei<span class="s2">Search</span>
+  </div>
+  <div class="nav-links">
+    <a href="#" data-link="home" class="active">Home</a>
+    <a href="#" data-link="bench">Benchmark</a>
+    <a href="#" data-link="arch">Architecture</a>
+    <a href="#" data-link="about">About</a>
+  </div>
+  <button class="cta-try" id="ctaTry">Try It Live →</button>
+</nav>
+
+<!-- ============== SCREEN 1: HERO ============== -->
+<section class="screen s1" id="screen1" data-screen-label="01 Landing">
+  <div class="hero-bg">
+    <div class="grid-pattern"></div>
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <canvas id="particles"></canvas>
+  </div>
+
+  <div class="hero">
+    <div class="pill-eyebrow" id="eyebrow">
+      <span class="pill-dot"></span> v0.4 · LIVE BENCHMARK · INDEX-FIRST
+    </div>
+    <h1 class="headline">
+      <span class="typed" id="typed"></span><span class="cursor"></span>
+    </h1>
+    <p class="subhead" id="subhead">
+      See the difference between <b>slow regex search</b> and <b>blazing-fast Atlas Search.</b>
+      Live. Side by side. Down to the millisecond.
+    </p>
+    <div class="ctas" id="ctas">
+      <button class="btn btn-primary" id="goBench">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-2 8 11-13h-6l2-7z"/></svg>
+        Run the Benchmark
+      </button>
+      <button class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Explore the GraphQL API
+      </button>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat"><div class="stat-num blue">4ms</div><div class="stat-label">P50 INDEXED</div></div>
+      <div class="stat"><div class="stat-num amber">312ms</div><div class="stat-label">P50 REGEX</div></div>
+      <div class="stat"><div class="stat-num teal">71×</div><div class="stat-label">FASTER</div></div>
+      <div class="stat"><div class="stat-num">1.2M</div><div class="stat-label">DOCS INDEXED</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SCREEN 2: BENCHMARK ============== -->
+<section class="screen s2" id="screen2" data-screen-label="02 Benchmark">
+  <div class="bench-wrap">
+    <div class="bench-bg"></div>
+
+    <div class="bench-head">
+      <div class="bench-title">
+        <h1>Live Benchmark <span class="accent">/</span> <span style="color:var(--ink-dim);font-weight:500">Side-by-side query race</span></h1>
+        <p>Same query. Same dataset. Two engines. One winner.</p>
+      </div>
+      <div class="bench-meta">
+        <span><span class="live-dot" style="display:inline-block;margin-right:6px"></span>CONNECTED</span>
+        <span>NODE_US-EAST-2</span>
+        <span>1,243,891 DOCS</span>
+      </div>
+    </div>
+
+    <div class="search-card">
+      <div class="search-input-wrap" id="searchWrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" id="searchInput" placeholder="Search products, articles, topics…" value="iPhone" />
+        <span class="kbd"><kbd>⌘</kbd><kbd>K</kbd></span>
+      </div>
+
+      <!-- TYPO HINT ROW -->
+      <div class="typo-hint">
+        <div class="typo-left">
+          <span class="typo-label">Try a typo:</span>
+          <button class="typo-chip" data-typo="iphane">iphane</button>
+          <button class="typo-chip" data-typo="iphome">iphome</button>
+          <button class="typo-chip" data-typo="samsng">samsng</button>
+          <button class="typo-chip" data-typo="macbok">macbok</button>
+        </div>
+        <div class="typo-fuzzy">
+          <span class="heart"></span>
+          Fuzzy matching active
+        </div>
+      </div>
+
+      <div class="engine-row">
+        <div class="loadbar" id="loadbar"></div>
+        <button class="engine-btn engine-slow" id="btnSlow">
+          <span class="icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12c0-3.3 3.6-6 8-6s8 2.7 8 6c0 1.7-1 3-3 3-2.3 0-3-2-5-2s-2.5 2-5 2c-1.7 0-3-1.3-3-3z"/>
+              <circle cx="11" cy="11" r="1.2" fill="currentColor"/>
+              <path d="M14 7c1-1 2-1 3-1"/>
+            </svg>
+          </span>
+          <span class="label">
+            <small>Engine 01 · Naive</small>
+            Normal Search · MongoDB $regex
+          </span>
+        </button>
+        <button class="engine-btn engine-fast active" id="btnFast">
+          <span class="icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-2 8 11-13h-6l2-7z"/></svg>
+          </span>
+          <span class="label">
+            <small>Engine 02 · Optimized</small>
+            Atlas Search · Lucene Index
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- console bubble (positioned via JS) -->
+    <div class="console-bubble" id="bubble">
+      <div class="console-head">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <span class="console-title">atlas.trace ⌁ live</span>
+      </div>
+      <div class="console-line" data-line="1"><span class="check">✓</span> <span class="key">query</span> received</div>
+      <div class="console-line" data-line="2"><span class="check">✓</span> <span class="key">Atlas Search</span> Lucene index hit</div>
+      <div class="console-line" data-line="3"><span class="check">✓</span> <span class="key">edit_distance</span> scoring applied</div>
+      <div class="console-line" data-line="4"><span class="check">✓</span> <span class="key">results</span> returned <span class="num">10</span></div>
+      <div class="console-line" data-line="5"><span class="check">✓</span> <span class="key">time</span> <span class="num">8ms</span></div>
+    </div>
+
+    <!-- RESULTS GRID -->
+    <div class="results-grid">
+
+      <div class="panel slow" id="panelSlow">
+        <div class="panel-head">
+          <div class="panel-title slow">
+            <span class="dot"></span>
+            MongoDB $regex Results
+            <small>· naive scan</small>
+          </div>
+          <span class="latency-badge slow" id="badgeSlow"><span class="pip"></span><span id="msSlow">312ms</span></span>
+        </div>
+        <div class="results-list" id="listSlow"></div>
+      </div>
+
+      <div class="panel fast" id="panelFast">
+        <div class="panel-head">
+          <div class="panel-title fast">
+            <span class="dot"></span>
+            Atlas Search Results
+            <small>· Lucene index</small>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="fuzzy-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Fuzzy matching active — tolerates typos</span>
+            <span class="latency-badge fast" id="badgeFast"><span class="pip"></span><span id="msFast">8ms</span></span>
+          </div>
+        </div>
+        <div class="results-list" id="listFast"></div>
+      </div>
+
+    </div>
+
+    <!-- COMPARE -->
+    <div class="compare-card">
+      <div class="compare-head">
+        <div class="compare-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7ec0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-2 8 11-13h-6l2-7z"/></svg>
+          Atlas Search was <span class="multiplier" id="multiplier">71×</span> faster this search
+        </div>
+        <div class="bench-meta">
+          <span>SAMPLE · n=1</span>
+          <span>RUN <span style="color:var(--ink-dim)">#0042</span></span>
+        </div>
+      </div>
+      <div class="compare-bars">
+        <div class="compare-row">
+          <span class="name">$regex</span>
+          <span class="track"><span class="fill fill-slow" id="fillSlow"></span></span>
+          <span class="ms warn" id="cmpMsSlow">312 ms</span>
+        </div>
+        <div class="compare-row">
+          <span class="name">Atlas Search</span>
+          <span class="track"><span class="fill fill-fast" id="fillFast"></span></span>
+          <span class="ms ok" id="cmpMsFast">4 ms</span>
+        </div>
+      </div>
+      <div class="foot">
+        Press <kbd>↵</kbd> to re-run · <kbd>Esc</kbd> to return home · queries run against a 1.2M-doc product corpus
+      </div>
+    </div>
+
+    <!-- ADVANTAGES STRIP -->
+    <div class="adv-section" id="advSection">
+      <h3 class="adv-heading">Why Atlas Search wins</h3>
+      <div class="adv-grid">
+        <div class="adv-card teal">
+          <span class="adv-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+          </span>
+          <div class="adv-title">Fuzzy Matching</div>
+          <p class="adv-body">Tolerates typos using Levenshtein edit distance. Type <em>iphane</em> and still find iPhone. MongoDB <em>$regex</em> returns nothing.</p>
+        </div>
+        <div class="adv-card blue">
+          <span class="adv-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="10"/><line x1="10" y1="20" x2="10" y2="4"/><line x1="16" y1="20" x2="16" y2="14"/><line x1="22" y1="20" x2="22" y2="8"/></svg>
+          </span>
+          <div class="adv-title">Relevance Scoring</div>
+          <p class="adv-body">Results ranked by how well they match, not insertion order. Built on Apache Lucene — same engine powering Elasticsearch.</p>
+        </div>
+        <div class="adv-card amber">
+          <span class="adv-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-2 8 11-13h-6l2-7z"/></svg>
+          </span>
+          <div class="adv-title">O(1) at Any Scale</div>
+          <p class="adv-body">Inverted index lookup stays flat at <em>8ms</em> whether you have 10,000 or 10,000,000 documents. <em>$regex</em> grows linearly and eventually times out.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============== SCREEN 3: ARCHITECTURE ============== -->
+<section class="screen s3" id="screen3" data-screen-label="03 Architecture">
+  <div class="arch-wrap">
+    <div class="arch-head">
+      <div class="section-eyebrow" style="text-align:center">DATA FLOW · END-TO-END</div>
+      <h1>How It <span class="acc">Works</span></h1>
+      <p>From your search query to results in 4ms — here's every step.</p>
+    </div>
+
+    <div class="flow-rail">
+      <div class="flow-line">
+        <svg preserveAspectRatio="none" viewBox="0 0 100 2"><path id="flowPath" class="seg" d="M0 1 L100 1"/></svg>
+      </div>
+
+      <div class="flow-nodes" id="flowNodes">
+        <div class="flow-node" data-step="1">
+          <div class="bubble">
+            <span class="num">01</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>
+          </div>
+          <div class="lbl">User types a search term</div>
+        </div>
+        <div class="flow-node" data-step="2">
+          <div class="bubble">
+            <span class="num">02</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8 22 16 12 22 2 16 2 8 12 2"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div class="lbl">GraphQL resolves the query</div>
+        </div>
+        <div class="flow-node" data-step="3">
+          <div class="bubble">
+            <span class="num">03</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v6a4 4 0 0 0 4 4h4a4 4 0 0 1 4 4v4"/><path d="M6 3v6a4 4 0 0 1 4 4h4a4 4 0 0 0 4 4v4"/><polyline points="14 17 18 21 14 21"/></svg>
+          </div>
+          <div class="lbl">Both engines run in parallel</div>
+        </div>
+        <div class="flow-node amber" data-step="4">
+          <div class="bubble">
+            <span class="num">04</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c5 4 7 9 5 14-1 3-3 5-5 6-2-1-4-3-5-6-2-5 0-10 5-14z"/><path d="M12 22V8"/></svg>
+          </div>
+          <div class="lbl">MongoDB does a full collection scan</div>
+        </div>
+        <div class="flow-node teal" data-step="5">
+          <div class="bubble">
+            <span class="num">05</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-2 8 11-13h-6l2-7z"/></svg>
+          </div>
+          <div class="lbl">Atlas Search hits the Lucene index</div>
+        </div>
+        <div class="flow-node" data-step="6">
+          <div class="bubble">
+            <span class="num">06</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 7 12 12 2 7 12 2"/><polyline points="2 12 12 17 22 12"/><polyline points="2 17 12 22 22 17"/></svg>
+          </div>
+          <div class="lbl">DataLoader batches DB calls, response sent</div>
+        </div>
+      </div>
+
+      <div class="flow-controls">
+        <button class="ctrl-btn" id="prevStep" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Previous
+        </button>
+        <div class="step-counter">Step <b id="stepNum">1</b> of <b>6</b></div>
+        <button class="ctrl-btn primary" id="nextStep">
+          Next Step
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="detail-panel" id="detailPanel">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ============== SCREEN 4: ABOUT ============== -->
+<section class="screen s4" id="screen4" data-screen-label="04 About">
+  <div class="about-wrap">
+
+    <div class="about-section">
+      <div class="section-eyebrow">SECTION A · THE BUILD</div>
+      <h2>Built to show what junior devs skip</h2>
+      <p class="sub">Every layer is intentional. Every choice is a pattern that scales past a side project.</p>
+
+      <div class="stack-grid" id="stackGrid">
+        <!-- populated by JS -->
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-label">BUILD ORDER</div>
+        <div class="timeline-rail" id="timelineRail">
+          <!-- populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <div class="section-eyebrow">SECTION B · IN PRODUCTION</div>
+      <h2>This isn't just a demo pattern</h2>
+      <p class="sub">These are the exact patterns used at scale across the industry.</p>
+
+      <div class="scale-grid">
+        <div class="scale-card">
+          <div class="scale-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><polyline points="7 14 11 10 14 13 21 6"/><polyline points="17 6 21 6 21 10"/></svg>
+          </div>
+          <div>
+            <div class="scale-num" data-target="1000000000" data-suffix="+" data-format="big">0</div>
+            <div class="scale-label">documents Atlas Search can index</div>
+          </div>
+          <p class="scale-body">Search at scale. Production teams adopt inverted-index engines after they outgrow heavyweight alternatives. The pattern scales horizontally — sharding by document range or tenant.</p>
+        </div>
+
+        <div class="scale-card">
+          <div class="scale-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 11v6c0 1.7 4 3 9 3s9-1.3 9-3v-6"/></svg>
+          </div>
+          <div>
+            <div class="scale-num" data-target="100" data-suffix="×">0</div>
+            <div class="scale-label">reduction in DB queries with DataLoader</div>
+          </div>
+          <p class="scale-body">N+1 in the wild. DataLoader was open-sourced for GraphQL APIs that needed to coalesce hundreds of resolver-triggered lookups into a single batched <span class="mono">$in</span> query.</p>
+        </div>
+
+        <div class="scale-card">
+          <div class="scale-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z"/></svg>
+          </div>
+          <div>
+            <div class="scale-num" data-target="0" data-suffix="" data-zero="Zero">0</div>
+            <div class="scale-label">runaway queries reach the database</div>
+          </div>
+          <p class="scale-body">Complexity guards. Major GraphQL APIs use complexity scoring to prevent a single client from triggering recursive queries that could exhaust the server.</p>
+        </div>
+      </div>
+
+      <div class="closing">
+        SenseiSearch is a portfolio project that demonstrates <b>production-grade backend patterns</b> — the kind interviewers specifically ask about.
+      </div>
+
+      <div class="about-foot">
+        <div>Built with MongoDB Atlas · MongoDB Atlas Search · Apollo Server · Next.js</div>
+        <div class="links">
+          <a href="#">GitHub</a>
+          <a href="#">GraphQL Explorer</a>
+          <a href="#" id="backTop">Back to Top ↑</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+/* =========================================================
+   PARTICLES (subtle floaty dots)
+   ========================================================= */
+(function particles(){
+  const c = document.getElementById('particles');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  let w,h,parts;
+  function resize(){
+    w = c.width = window.innerWidth * devicePixelRatio;
+    h = c.height = window.innerHeight * devicePixelRatio;
+    c.style.width = window.innerWidth+'px';
+    c.style.height = window.innerHeight+'px';
+    parts = Array.from({length:60}, () => ({
+      x:Math.random()*w, y:Math.random()*h,
+      vx:(Math.random()-.5)*.15*devicePixelRatio,
+      vy:(Math.random()-.5)*.15*devicePixelRatio,
+      r:(Math.random()*1.5+.4)*devicePixelRatio,
+      a:Math.random()*.6+.2,
+      hue: Math.random()<.4 ? 'rgba(126,192,255,' : 'rgba(180,200,230,'
+    }));
+  }
+  function tick(){
+    ctx.clearRect(0,0,w,h);
+    for(const p of parts){
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0) p.x=w; if(p.x>w) p.x=0;
+      if(p.y<0) p.y=h; if(p.y>h) p.y=0;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = p.hue + p.a + ')';
+      ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  tick();
+})();
+
+/* =========================================================
+   TYPING ANIMATION
+   ========================================================= */
+const phrases = [
+  "Ever wondered how searching 'iPhone' returns results in milliseconds?",
+  "How does a marketplace search 500 million products instantly?",
+  "Why does the web feel instant but your app feels slow?",
+  "The answer is in the index."
+];
+const typedEl = document.getElementById('typed');
+function typeLoop(){
+  let i = 0;
+  async function run(){
+    while(true){
+      const phrase = phrases[i];
+      // type in
+      for(let k=0;k<=phrase.length;k++){
+        typedEl.textContent = phrase.slice(0,k);
+        await wait(28 + Math.random()*30);
+      }
+      await wait(2000);
+      // fade out
+      await new Promise(res => {
+        gsap.to(typedEl, {opacity:0, duration:.35, onComplete:res});
+      });
+      typedEl.textContent = '';
+      gsap.set(typedEl,{opacity:1});
+      i = (i+1) % phrases.length;
+    }
+  }
+  run();
+}
+function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+
+/* =========================================================
+   PAGE LOAD INTRO (GSAP)
+   ========================================================= */
+window.addEventListener('load', ()=>{
+  const tl = gsap.timeline({defaults:{ease:'power3.out'}});
+  tl.to('#nav', {y:0, duration:.7})
+    .from('#eyebrow', {y:18, opacity:0, duration:.6}, '-=.3')
+    .from('#typed', {y:24, opacity:0, duration:.7}, '-=.3')
+    .from('#subhead', {y:20, opacity:0, duration:.7}, '-=.45')
+    .from('#ctas .btn', {y:20, opacity:0, duration:.6, stagger:.1}, '-=.5')
+    .from('#stats .stat', {y:20, opacity:0, duration:.6, stagger:.08}, '-=.5');
+  typeLoop();
+});
+
+/* =========================================================
+   PRODUCT DATA (placeholders, generic e-commerce-style)
+   ========================================================= */
+const products = [
+  {name:"iPhone 15 Pro", desc:"Titanium flagship phone · A17 Pro · 48MP camera array", tag:"Phones", tagClass:"tag-phones", price:"$999", swatch:"linear-gradient(135deg,#222,#3a3a3a)", code:"IMG_01"},
+  {name:"iPhone 15 Plus", desc:"6.7\" display · all-day battery · USB-C", tag:"Phones", tagClass:"tag-phones", price:"$899", swatch:"linear-gradient(135deg,#1a2230,#2a3650)", code:"IMG_02"},
+  {name:"iPhone SE 3rd Gen", desc:"Compact · A15 Bionic · home button", tag:"Phones", tagClass:"tag-phones", price:"$429", swatch:"linear-gradient(135deg,#2a2222,#3a2a2a)", code:"IMG_03"},
+  {name:"MacBook Air M3", desc:"13\" Liquid Retina · 18hr battery · fanless", tag:"Laptops", tagClass:"tag-laptops", price:"$1,099", swatch:"linear-gradient(135deg,#202028,#34344a)", code:"IMG_04"},
+  {name:"iPad Pro 13\"", desc:"M4 chip · Tandem OLED · ProMotion 120Hz", tag:"Tablets", tagClass:"tag-tablets", price:"$1,299", swatch:"linear-gradient(135deg,#332714,#4a3a1f)", code:"IMG_05"},
+  {name:"Sony WH-1000XM5", desc:"Premium noise-cancelling headphones · 30hr", tag:"Audio", tagClass:"tag-audio", price:"$399", swatch:"linear-gradient(135deg,#142428,#1f3a40)", code:"IMG_06"},
+  {name:"Samsung Galaxy S24 Ultra", desc:"AI tools · 200MP camera · titanium frame", tag:"Phones", tagClass:"tag-phones", price:"$1,299", swatch:"linear-gradient(135deg,#201428,#3a1f4a)", code:"IMG_07"},
+  {name:"Apple Watch Series 9", desc:"Always-on Retina · double-tap gesture", tag:"Watches", tagClass:"tag-watches", price:"$399", swatch:"linear-gradient(135deg,#28141c,#4a1f2c)", code:"IMG_08"},
+];
+
+function buildCard(p, query, highlight){
+  const card = document.createElement('div');
+  card.className = 'result-card';
+  let nameHtml = p.name;
+  if(highlight && query){
+    const re = new RegExp('('+query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig');
+    nameHtml = p.name.replace(re,'<mark>$1</mark>');
+  }
+  card.innerHTML = `
+    <div class="result-thumb" style="background:${p.swatch}">
+      <div class="ph"></div>
+      <div class="label">${p.code}</div>
+    </div>
+    <div class="result-body">
+      <div class="result-name">${nameHtml}</div>
+      <div class="result-desc">${p.desc}</div>
+      <div class="result-meta">
+        <span class="tag ${p.tagClass}">${p.tag}</span>
+        <span class="price">${p.price}</span>
+      </div>
+    </div>`;
+  return card;
+}
+
+function getMatches(query){
+  if(!query) return products.slice(0,5);
+  const q = query.toLowerCase();
+  const matches = products.filter(p => (p.name+' '+p.desc+' '+p.tag).toLowerCase().includes(q));
+  return matches.length ? matches.slice(0,5) : products.slice(0,3);
+}
+
+/* =========================================================
+   SCREEN TRANSITION
+   ========================================================= */
+const screens = {
+  home: document.getElementById('screen1'),
+  bench: document.getElementById('screen2'),
+  arch: document.getElementById('screen3'),
+  about: document.getElementById('screen4'),
+};
+const s1 = screens.home, s2 = screens.bench;
+let currentScreen = 'home';
+let onScreen2 = false;
+
+function goToScreen(name){
+  if(currentScreen === name) return;
+  const prev = currentScreen;
+  const prevEl = screens[prev];
+  const nextEl = screens[name];
+  currentScreen = name;
+  onScreen2 = (name === 'bench');
+
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const linkMap = {home:'home', bench:'bench', arch:'arch', about:'about'};
+  const lk = document.querySelector(`[data-link="${linkMap[name]}"]`);
+  if(lk) lk.classList.add('active');
+
+  // direction: forward if going right in the order
+  const order = ['home','bench','arch','about'];
+  const forward = order.indexOf(name) > order.indexOf(prev);
+
+  nextEl.style.display = 'block';
+  gsap.set(nextEl, {x: forward ? '100%' : '-100%', opacity: 0});
+  const tl = gsap.timeline({defaults:{ease:'power3.inOut'}});
+  tl.to(prevEl, {x: forward ? '-30%' : '30%', opacity:0, duration:.55})
+    .to(nextEl, {x:'0%', opacity:1, duration:.6}, '-=.4')
+    .add(() => {
+      prevEl.style.display = 'none';
+      window.scrollTo(0,0);
+      if(name === 'bench') { runFastSearch(); animateAdvantages(); }
+      if(name === 'arch') initArch();
+      if(name === 'about') initAbout();
+    }, '-=.1');
+}
+
+function goToScreen2(){ goToScreen('bench'); }
+function goToScreen1(){ goToScreen('home'); }
+
+document.getElementById('goBench').addEventListener('click', goToScreen2);
+document.getElementById('ctaTry').addEventListener('click', goToScreen2);
+document.querySelector('[data-link="bench"]').addEventListener('click', e => {e.preventDefault(); goToScreen('bench');});
+document.querySelector('[data-link="home"]').addEventListener('click', e => {e.preventDefault(); goToScreen('home');});
+document.querySelector('[data-link="arch"]').addEventListener('click', e => {e.preventDefault(); goToScreen('arch');});
+document.querySelector('[data-link="about"]').addEventListener('click', e => {e.preventDefault(); goToScreen('about');});
+window.addEventListener('keydown', e => {
+  if(e.key==='Escape') goToScreen('home');
+  if(e.key==='Enter' && onScreen2 && document.activeElement === document.getElementById('searchInput')){
+    runFastSearch();
+  }
+});
+
+/* =========================================================
+   ARCHITECTURE SCREEN
+   ========================================================= */
+const archSteps = [
+  {
+    n:1, tag:'STEP_01',
+    title:'User Query',
+    sub:'The journey begins on the client.',
+    body:'The search term is sent from the Next.js frontend as a GraphQL query over HTTP to the Express server. No client-side filtering. No optimistic guesses. The server is the source of truth.',
+    rightHtml:`
+      <div class="detail-card">
+        <div><span class="cm">// frontend → server</span></div>
+        <div><span class="kw">query</span> <span class="fn">SearchProducts</span> {</div>
+        <div>&nbsp;&nbsp;<span class="fn">search</span>(<span class="kw">term</span>: <span class="str">"iPhone"</span>) {</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;title</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;price</div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;category</div>
+        <div>&nbsp;&nbsp;}</div>
+        <div>}</div>
+      </div>
+      <div class="stat-row"><span style="color:var(--ink-dim)">network</span> <span class="arrow-big">→</span> <span class="num" style="color:#7ec0ff">POST /graphql · 1.4kb</span></div>`
+  },
+  {
+    n:2, tag:'STEP_02',
+    title:'GraphQL Layer',
+    sub:'Apollo Server enforces sanity before execution.',
+    body:'Apollo Server receives the query. The query complexity score is calculated before execution. Queries scoring above 100 are rejected automatically — protecting the database from recursive abuse.',
+    rightHtml:`
+      <div class="score-pill"><span class="dot"></span>SCORE: 7 — ALLOWED</div>
+      <div class="complexity-strip">
+        <span class="seg green">1–10 OK</span>
+        <span class="seg amber">11–25 WARN</span>
+        <span class="seg red">25+ REJECT</span>
+      </div>
+      <div class="detail-card">
+        <div><span class="cm">// resolver entry</span></div>
+        <div><span class="kw">const</span> <span class="fn">cost</span> = <span class="fn">computeComplexity</span>(query)</div>
+        <div><span class="kw">if</span> (cost &gt; <span class="num">100</span>) <span class="kw">throw</span> <span class="fn">RejectedError</span>()</div>
+      </div>`
+  },
+  {
+    n:3, tag:'STEP_03',
+    title:'Parallel Execution',
+    sub:'Both engines fire — neither waits.',
+    body:'Promise.all() fires both MongoDB $regex and Atlas Search simultaneously. Neither waits for the other. Both results return and are compared in real time so the benchmark is apples-to-apples.',
+    rightHtml:`
+      <div class="detail-card">
+        <div><span class="kw">await</span> <span class="fn">Promise.all</span>([</div>
+        <div>&nbsp;&nbsp;<span class="fn">mongo.find</span>({ name: { $regex } }),</div>
+        <div>&nbsp;&nbsp;<span class="fn">atlasSearch.aggregate</span>(term),</div>
+        <div>])</div>
+      </div>
+      <div class="mini-bars">
+        <div class="mini-bar"><span class="lab">MONGO</span><span class="track"><span class="fill fill-slow" id="parBarSlow"></span></span><span class="ms" style="color:#ff8a5c">312ms</span></div>
+        <div class="mini-bar"><span class="lab">ATLAS</span><span class="track"><span class="fill fill-fast" id="parBarFast"></span></span><span class="ms" style="color:var(--teal-2)">8ms</span></div>
+      </div>`
+  },
+  {
+    n:4, tag:'STEP_04', color:'amber',
+    title:'MongoDB $regex',
+    sub:'The slow path — full collection scan.',
+    body:'MongoDB scans every document in the collection using a regex pattern. No index is used. At 10,000 documents this takes 200–400ms. At 1 million documents it becomes unusable.',
+    rightHtml:`
+      <div class="detail-card">
+        <div><span class="cm">// no index hit</span></div>
+        <div>db.products.<span class="fn">find</span>({</div>
+        <div>&nbsp;&nbsp;name: { $regex: <span class="str">/iPhone/i</span> }</div>
+        <div>})</div>
+        <div><span class="cm">// COLLSCAN — every doc</span></div>
+      </div>
+      <div class="stat-row warn"><span style="color:var(--ink-dim)">10,000 docs scanned</span> <span class="arrow-big">→</span> <span class="num">312ms</span></div>
+      <div class="stat-row warn"><span style="color:var(--ink-dim)">1M docs (extrapolated)</span> <span class="arrow-big">→</span> <span class="num">~31,000ms</span></div>`
+  },
+  {
+    n:5, tag:'STEP_05', color:'teal',
+    title:'Atlas Search hits the Lucene index',
+    sub:'The fast path — pre-computed lookups.',
+    body:'MongoDB Atlas Search is built on Apache Lucene — the same engine powering Elasticsearch. It pre-builds an inverted index at write time. Every word maps directly to matching documents. No scanning. O(1) lookup regardless of collection size.',
+    rightHtml:`
+      <div class="index-vis">
+        <span class="word">"iPhone"</span>
+        <span class="arrow">→</span>
+        <span class="docs">
+          <span class="doc">doc_001</span>
+          <span class="doc">doc_047</span>
+          <span class="doc">doc_312</span>
+          <span class="doc">doc_984</span>
+          <span class="doc">…</span>
+        </span>
+      </div>
+      <div class="detail-card">
+        <div><span class="cm">// pre-built at write time</span></div>
+        <div><span class="kw">index</span>[<span class="str">"iphone"</span>] = [<span class="num">1</span>, <span class="num">47</span>, <span class="num">312</span>, <span class="num">984</span>, …]</div>
+      </div>
+      <div class="stat-row ok"><span style="color:var(--ink-dim)">100,000 docs indexed</span> <span class="arrow-big">→</span> <span class="num">8ms</span></div>`
+  },
+  {
+    n:6, tag:'STEP_06',
+    title:'DataLoader & Response',
+    sub:'Batch the lookups. Fire one query.',
+    body:'DataLoader collects all author/category lookups triggered by resolvers and batches them into a single MongoDB query using $in. Instead of N separate queries, only 1 fires. Results are merged and returned to the frontend as a single GraphQL response.',
+    rightHtml:`
+      <div class="detail-card">
+        <div><span class="cm">// 3 resolver requests, same tick</span></div>
+        <div><span class="fn">authorLoader.load</span>(<span class="str">"a1"</span>)</div>
+        <div><span class="fn">authorLoader.load</span>(<span class="str">"a2"</span>)</div>
+        <div><span class="fn">authorLoader.load</span>(<span class="str">"a3"</span>)</div>
+        <div><span class="cm">// → coalesced into:</span></div>
+        <div>db.authors.<span class="fn">find</span>({ _id: { $in: [<span class="str">"a1"</span>,<span class="str">"a2"</span>,<span class="str">"a3"</span>] } })</div>
+      </div>
+      <div class="stat-row ok"><span style="color:var(--ink-dim)">3 author lookups</span> <span class="arrow-big">→ batched →</span> <span class="num">1 DB query</span></div>
+      <div class="score-pill" style="background:rgba(38,200,147,.1)"><span class="dot"></span>TOTAL: 4ms END-TO-END</div>`
+  },
+];
+
+let archInited = false;
+let currentStep = 1;
+
+function initArch(){
+  if(archInited) return;
+  archInited = true;
+
+  // entrance animation for nodes
+  gsap.fromTo('.flow-node', {scale:.8, opacity:0}, {scale:1, opacity:1, duration:.5, stagger:.1, ease:'back.out(1.6)'});
+  gsap.fromTo('.flow-line', {opacity:0}, {opacity:1, duration:.6, delay:.4});
+
+  // wire interactions
+  document.querySelectorAll('.flow-node').forEach(n => {
+    n.addEventListener('click', () => setStep(parseInt(n.dataset.step)));
+  });
+  document.getElementById('nextStep').addEventListener('click', () => setStep(Math.min(6, currentStep+1)));
+  document.getElementById('prevStep').addEventListener('click', () => setStep(Math.max(1, currentStep-1)));
+
+  setStep(1, true);
+}
+
+function setStep(n, instant){
+  currentStep = n;
+  document.querySelectorAll('.flow-node').forEach(node => {
+    const s = parseInt(node.dataset.step);
+    node.classList.toggle('active', s === n);
+    node.classList.toggle('done', s < n);
+  });
+  document.getElementById('stepNum').textContent = n;
+  document.getElementById('prevStep').disabled = (n === 1);
+  document.getElementById('nextStep').disabled = (n === 6);
+
+  // update flow-line
+  const path = document.getElementById('flowPath');
+  if(path){
+    // recreate segs
+    const svgWrap = path.parentNode;
+    svgWrap.innerHTML = '';
+    // 5 segments between 6 nodes — at x positions 8.33, 25, 41.66, 58.33, 75, 91.66 (one node per 16.66)
+    // Connector i goes from node i to i+1
+    for(let i=0; i<5; i++){
+      const x1 = (100/6) * (i + .5) + (100/12) * 0; // approximate
+    }
+    // simpler: use 6 columns; node centers at (i+.5) * 100/6
+    const seg = document.createElementNS('http://www.w3.org/2000/svg','g');
+    for(let i=0;i<5;i++){
+      const x1 = (i+.5) * 100/6;
+      const x2 = (i+1.5) * 100/6;
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', x1);
+      line.setAttribute('x2', x2);
+      line.setAttribute('y1', 1);
+      line.setAttribute('y2', 1);
+      line.classList.add('seg');
+      // every segment from node 1 up through the active node flows
+      if(i+1 <= n-1) line.classList.add('active');
+      seg.appendChild(line);
+    }
+    svgWrap.appendChild(seg);
+  }
+
+  renderDetail(n, instant);
+}
+
+function renderDetail(n, instant){
+  const step = archSteps[n-1];
+  const panel = document.getElementById('detailPanel');
+  const html = `
+    <div class="left">
+      <h3><span class="step-tag">${step.tag}</span>${step.title}</h3>
+      <p class="sub">${step.sub}</p>
+      <p class="body-text">${step.body}</p>
+    </div>
+    <div class="right">${step.rightHtml}</div>`;
+  if(instant){
+    panel.innerHTML = html;
+    return;
+  }
+  gsap.to(panel, {opacity:0, y:6, duration:.18, onComplete:()=>{
+    panel.innerHTML = html;
+    gsap.fromTo(panel, {opacity:0, y:10}, {opacity:1, y:0, duration:.4, ease:'power2.out'});
+    // animate parallel bars if present
+    const ps = panel.querySelector('#parBarSlow');
+    const pf = panel.querySelector('#parBarFast');
+    if(ps) gsap.fromTo(ps, {width:'0%'}, {width:'92%', duration:1.4, ease:'power1.inOut'});
+    if(pf) gsap.fromTo(pf, {width:'0%'}, {width:'8%', duration:.4, ease:'power2.out'});
+    // animate index docs popping in
+    panel.querySelectorAll('.index-vis .doc').forEach((d,i)=>{
+      gsap.fromTo(d, {scale:0, opacity:0}, {scale:1, opacity:1, duration:.35, delay:.1+i*.07, ease:'back.out(2)'});
+    });
+  }});
+}
+
+/* =========================================================
+   ABOUT SCREEN
+   ========================================================= */
+const stack = [
+  {name:'Next.js', why:'App Router for fast page rendering and routing', icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 8v8M9 8l6 8"/></svg>`},
+  {name:'Apollo Client', why:'GraphQL queries with caching on the frontend', icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 16 12 6l4 10"/><path d="M9.5 13h5"/></svg>`},
+  {name:'Express + Apollo Server v4', why:'Lightweight GraphQL API layer', icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/></svg>`},
+  {name:'MongoDB Atlas', why:'Free-tier document store, intentionally slow for demo', icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c5 4 7 9 5 14-1 3-3 5-5 6-2-1-4-3-5-6-2-5 0-10 5-14z"/><path d="M12 22V8"/></svg>`},
+  {name:'MongoDB Atlas Search', why:'Lucene-based inverted index built into Atlas, same engine as Elasticsearch', icon:`<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-2 8 11-13h-6l2-7z"/></svg>`},
+  {name:'DataLoader', why:'Eliminates the N+1 query problem at the resolver level', icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 11v6c0 1.7 4 3 9 3s9-1.3 9-3v-6"/></svg>`},
+  {name:'GraphQL Complexity Scoring', why:'Protects the API from expensive nested queries', icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z"/><path d="M9 12l2 2 4-4"/></svg>`},
+  {name:'Node.js', why:'Non-blocking async runtime powering Promise.all parallelism', icon:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 7 22 17 12 22 2 17 2 7 12 2"/><path d="M12 12v10M2 7l10 5 10-5"/></svg>`},
+];
+
+const buildOrder = ['Schema','Models','Services','Resolvers','DataLoader','Frontend','Benchmark UI'];
+
+let aboutInited = false;
+
+function initAbout(){
+  if(aboutInited) return;
+  aboutInited = true;
+
+  // populate stack
+  const grid = document.getElementById('stackGrid');
+  grid.innerHTML = stack.map(s => `
+    <div class="stack-card">
+      <div class="stack-icon">${s.icon}</div>
+      <div class="stack-name">${s.name}</div>
+      <div class="stack-why">${s.why}</div>
+    </div>`).join('');
+
+  // populate timeline
+  const rail = document.getElementById('timelineRail');
+  rail.innerHTML = buildOrder.map((b,i) => `
+    <div class="tpill"><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>${b}</div>
+    ${i < buildOrder.length-1 ? '<span class="tline"></span>' : ''}
+  `).join('');
+
+  // animate stack cards
+  gsap.fromTo('.stack-card', {y:20, opacity:0}, {y:0, opacity:1, duration:.55, stagger:.06, ease:'power2.out', delay:.15});
+  gsap.fromTo('.tpill', {opacity:0, y:8}, {opacity:1, y:0, duration:.4, stagger:.08, ease:'power2.out', delay:.7});
+  gsap.fromTo('.tline', {opacity:0, scaleX:0}, {opacity:1, scaleX:1, duration:.3, stagger:.08, ease:'power2.out', delay:.78, transformOrigin:'left center'});
+
+  // scale cards count up
+  gsap.fromTo('.scale-card', {y:30, opacity:0}, {y:0, opacity:1, duration:.6, stagger:.12, ease:'power3.out', delay:.3});
+  document.querySelectorAll('.scale-num').forEach(el => {
+    const target = parseInt(el.dataset.target,10);
+    const suffix = el.dataset.suffix || '';
+    const zero = el.dataset.zero;
+    if(target === 0 && zero){
+      gsap.fromTo(el, {opacity:0}, {opacity:1, duration:.6, delay:.7, onStart:()=>{ el.textContent = zero; }});
+      return;
+    }
+    const isBig = el.dataset.format === 'big';
+    const obj = {v:0};
+    gsap.to(obj, {
+      v: target, duration:1.6, ease:'power2.out', delay:.5,
+      onUpdate:()=>{
+        let val = Math.floor(obj.v);
+        let display;
+        if(isBig){
+          if(val >= 1e9) display = (val/1e9).toFixed(val>=1e9?1:0).replace(/\.0$/,'') + 'B';
+          else if(val >= 1e6) display = (val/1e6).toFixed(0) + 'M';
+          else if(val >= 1e3) display = (val/1e3).toFixed(0) + 'K';
+          else display = val;
+        } else {
+          display = val.toLocaleString();
+        }
+        el.textContent = display + suffix;
+      }
+    });
+  });
+
+  document.getElementById('backTop').addEventListener('click', e => {
+    e.preventDefault();
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+}
+
+/* =========================================================
+   SEARCH BEHAVIOR
+   ========================================================= */
+const listSlow = document.getElementById('listSlow');
+const listFast = document.getElementById('listFast');
+const badgeSlow = document.getElementById('badgeSlow');
+const badgeFast = document.getElementById('badgeFast');
+const msSlow = document.getElementById('msSlow');
+const msFast = document.getElementById('msFast');
+const fillSlow = document.getElementById('fillSlow');
+const fillFast = document.getElementById('fillFast');
+const cmpMsSlow = document.getElementById('cmpMsSlow');
+const cmpMsFast = document.getElementById('cmpMsFast');
+const multiplier = document.getElementById('multiplier');
+const loadbar = document.getElementById('loadbar');
+const bubble = document.getElementById('bubble');
+const searchInput = document.getElementById('searchInput');
+
+document.getElementById('btnSlow').addEventListener('click', runSlowSearch);
+document.getElementById('btnFast').addEventListener('click', runFastSearch);
+
+document.getElementById('searchWrap').addEventListener('focusin', e => e.currentTarget.classList.add('focus'));
+document.getElementById('searchWrap').addEventListener('focusout', e => e.currentTarget.classList.remove('focus'));
+
+// typo chip clicks → fill input + run fast search
+document.querySelectorAll('.typo-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    searchInput.value = chip.dataset.typo;
+    runFastSearch();
+  });
+});
+
+// chip entrance bounce on load
+gsap.fromTo('.typo-chip',
+  {scale:.6, opacity:0, y:6},
+  {scale:1, opacity:1, y:0, duration:.5, stagger:.05, ease:'back.out(2)', delay:.4}
+);
+gsap.fromTo('.typo-label, .typo-fuzzy',
+  {opacity:0, x:-6},
+  {opacity:1, x:0, duration:.4, delay:.3, ease:'power2.out'}
+);
+
+// advantage cards: fade up when bench screen first becomes visible
+let advAnimated = false;
+function animateAdvantages(){
+  if(advAnimated) return;
+  advAnimated = true;
+  gsap.fromTo('.adv-card',
+    {y:20, opacity:0},
+    {y:0, opacity:1, duration:.55, stagger:.1, ease:'power2.out'}
+  );
+  gsap.fromTo('.adv-heading',
+    {opacity:0, y:6},
+    {opacity:1, y:0, duration:.4, ease:'power2.out'}
+  );
+}
+
+function setActive(which){
+  document.getElementById('btnSlow').classList.toggle('active', which==='slow');
+  document.getElementById('btnFast').classList.toggle('active', which==='fast');
+}
+
+function clearLists(){
+  listSlow.innerHTML = '';
+  listFast.innerHTML = '';
+  gsap.set([badgeSlow,badgeFast], {opacity:0});
+}
+
+function fillBars(slowMs, fastMs){
+  const max = Math.max(slowMs, fastMs);
+  gsap.fromTo(fillSlow, {width:'0%'}, {width:(slowMs/max*100)+'%', duration:1.2, ease:'power3.out'});
+  gsap.fromTo(fillFast, {width:'0%'}, {width:Math.max(2,(fastMs/max*100))+'%', duration:.5, ease:'power2.out', delay:.1});
+  cmpMsSlow.textContent = slowMs+' ms';
+  cmpMsFast.textContent = fastMs+' ms';
+  const factor = Math.round(slowMs/fastMs);
+  multiplier.textContent = factor+'×';
+}
+
+function runSlowSearch(){
+  setActive('slow');
+  clearLists();
+  const q = searchInput.value.trim();
+  const matches = getMatches(q);
+  const slowMs = 280 + Math.floor(Math.random()*120); // 280-400
+  msSlow.querySelector ? null : null;
+  msSlow.textContent = slowMs+'ms';
+
+  // loadbar slow crawl
+  gsap.set(loadbar, {scaleX:0, opacity:1});
+  gsap.to(loadbar, {scaleX:1, duration:slowMs/1000, ease:'power1.inOut', onComplete:()=>{
+    gsap.to(loadbar, {opacity:0, duration:.3});
+  }});
+
+  // sluggish results — staggered fade-in top to bottom
+  matches.forEach(p => listSlow.appendChild(buildCard(p, q, false)));
+  gsap.fromTo('#listSlow .result-card',
+    {y:30, opacity:0},
+    {y:0, opacity:1, duration:.5, stagger:.18, delay:slowMs/1000 * .4, ease:'power2.out'}
+  );
+
+  // empty fast panel placeholder while slow runs
+  for(let i=0;i<3;i++){
+    const ph = document.createElement('div');
+    ph.className='result-card';
+    ph.style.opacity = .25;
+    ph.innerHTML = `<div class="result-thumb"><div class="ph"></div></div><div class="result-body"><div class="result-name" style="color:#3a3a3a">— idle —</div><div class="result-desc" style="color:#2c2c2c">awaiting query</div></div>`;
+    listFast.appendChild(ph);
+  }
+
+  // slow latency badge with slow pulse
+  gsap.delayedCall(slowMs/1000 + .2, () => {
+    gsap.to(badgeSlow, {opacity:1, duration:.4});
+  });
+
+  // bars
+  fillBars(slowMs, 4);
+}
+
+function runFastSearch(){
+  setActive('fast');
+  clearLists();
+  const q = searchInput.value.trim();
+  const matches = getMatches(q);
+  const fastMs = 6 + Math.floor(Math.random()*5); // 6-10
+  const slowMs = 280 + Math.floor(Math.random()*120);
+  msFast.textContent = fastMs+'ms';
+  msSlow.textContent = slowMs+'ms';
+
+  // also populate slow side dimmed for comparison
+  matches.forEach(p => listSlow.appendChild(buildCard(p, q, false)));
+  gsap.fromTo('#listSlow .result-card', {y:30, opacity:0}, {y:0, opacity:.55, duration:.5, stagger:.08, ease:'power2.out'});
+  gsap.delayedCall(.3, () => gsap.to(badgeSlow, {opacity:1, duration:.4}));
+
+  // fast panel: SLAM in
+  matches.forEach(p => listFast.appendChild(buildCard(p, q, true)));
+  gsap.fromTo('#listFast .result-card',
+    {y:0, opacity:0, scale:.92},
+    {y:0, opacity:1, scale:1, duration:.45, stagger:.05, ease:'back.out(2)'}
+  );
+
+  // fast latency badge — quick flash
+  gsap.fromTo(badgeFast, {opacity:0, scale:.7}, {opacity:1, scale:1, duration:.3, ease:'back.out(3)'});
+  gsap.fromTo(badgeFast, {boxShadow:'0 0 0 0 rgba(38,200,147,.6)'}, {boxShadow:'0 0 24px 6px rgba(38,200,147,0)', duration:.9, ease:'power2.out'});
+
+  // CONSOLE BUBBLE
+  showConsole(q, fastMs, matches.length);
+
+  // bars
+  fillBars(slowMs, fastMs);
+}
+
+function showConsole(query, ms, count){
+  // reset
+  gsap.killTweensOf(bubble);
+  gsap.killTweensOf('.console-line');
+  gsap.set('.console-line', {opacity:0});
+  // position next to fast button
+  const fastBtn = document.getElementById('btnFast');
+  const wrap = document.querySelector('.bench-wrap');
+  const wrapRect = wrap.getBoundingClientRect();
+  const btnRect = fastBtn.getBoundingClientRect();
+  bubble.style.left = (btnRect.left - wrapRect.left + 30) + 'px';
+  bubble.style.top  = (btnRect.bottom - wrapRect.top + 16) + 'px';
+
+  // update content (5 lines)
+  const lines = bubble.querySelectorAll('.console-line');
+  lines[0].innerHTML = `<span class="check">✓</span> <span class="key">query</span> received <span class="val">"${query||'*'}"</span>`;
+  lines[1].innerHTML = `<span class="check">✓</span> <span class="key">Atlas Search</span> Lucene index hit`;
+  lines[2].innerHTML = `<span class="check">✓</span> <span class="key">edit_distance</span> scoring applied`;
+  lines[3].innerHTML = `<span class="check">✓</span> <span class="key">results</span> returned <span class="num">${count}</span>`;
+  lines[4].innerHTML = `<span class="check">✓</span> <span class="key">time</span> <span class="num">${ms}ms</span>`;
+
+  const tl = gsap.timeline();
+  tl.fromTo(bubble, {scale:0, opacity:0}, {scale:1, opacity:1, duration:.5, ease:'back.out(2.2)'})
+    .to('.console-line', {opacity:1, duration:.05, stagger:.12}, '-=.15')
+    .to(bubble, {opacity:0, scale:.95, duration:.4, delay:2.4, ease:'power2.in'});
+}
+
+</script>
+</body>
+</html>
