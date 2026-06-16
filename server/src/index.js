@@ -9,6 +9,7 @@ import { typeDefs } from "./graphql/schema.js";
 import { resolvers } from "./graphql/resolvers.js";
 import { getComplexityPlugin } from "./graphql/complexity.js";
 import { createProductLoader } from "./dataloaders/productLoader.js";
+import { Product } from "./models/Product.js";
 
 const PORT = process.env.PORT || 4000;
 
@@ -39,8 +40,41 @@ app.use(
 );
 app.use(express.json());
 
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok", timestamp: new Date() });
+app.get("/health", async (_req, res) => {
+  try {
+    // ping mongodb — keeps cluster active
+    const mongoStart = Date.now();
+    await Product.findOne({}).lean();
+    const mongoTime = Date.now() - mongoStart;
+
+    // ping atlas search — keeps index active
+    const atlasStart = Date.now();
+    await Product.aggregate([
+      {
+        $search: {
+          index: "products_search",
+          text: {
+            query: "iphone",
+            path: ["title"],
+          },
+        },
+      },
+      { $limit: 1 },
+    ]);
+    const atlasTime = Date.now() - atlasStart;
+
+    res.json({
+      status: "ok",
+      timestamp: new Date(),
+      mongodb: `${mongoTime}ms`,
+      atlasSearch: `${atlasTime}ms`,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: err.message,
+    });
+  }
 });
 
 app.use("/graphql", async (req, res, next) => {
